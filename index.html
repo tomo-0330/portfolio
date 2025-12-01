@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.Tomohiro - Game Planner Portfolio</title>
+    
+    <!-- スタイルシート (Tailwind CSS) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & Babel (CDN) -->
+    <!-- React 18 -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel Standalone (v7) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- フォント (Noto Sans JP) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        /* モーダル表示時のスクロール固定用 */
+        body.modal-open { overflow: hidden; }
+        
+        /* フェードインアニメーション */
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 selection:bg-blue-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- アイコンコンポーネント (SVG直接定義) ---
+        const Icon = ({ path, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {path}
+            </svg>
+        );
+
+        const Icons = {
+            MapPin: (p) => <Icon {...p} path={<><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></>} />,
+            Cpu: (p) => <Icon {...p} path={<><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></>} />,
+            Users: (p) => <Icon {...p} path={<><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>} />,
+            TrendingUp: (p) => <Icon {...p} path={<><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></>} />,
+            Zap: (p) => <Icon {...p} path={<><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></>} />,
+            Layout: (p) => <Icon {...p} path={<><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></>} />,
+            Briefcase: (p) => <Icon {...p} path={<><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></>} />,
+            FileText: (p) => <Icon {...p} path={<><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></>} />,
+            ExternalLink: (p) => <Icon {...p} path={<><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></>} />,
+            Award: (p) => <Icon {...p} path={<><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></>} />,
+            X: (p) => <Icon {...p} path={<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>} />,
+            Lock: (p) => <Icon {...p} path={<><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>} />
+        };
+
+        // --- マップ画像のコンポーネント ---
+        const SpecMap = () => (
+            <svg viewBox="0 0 800 450" className="w-full h-auto bg-slate-50 rounded border border-slate-200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" strokeWidth="1"/>
+                    </pattern>
+                </defs>
+                <rect width="800" height="450" fill="url(#grid)" />
+                <g stroke="#94a3b8" strokeWidth="4">
+                    <line x1="100" y1="225" x2="250" y2="100" />
+                    <line x1="100" y1="225" x2="250" y2="350" />
+                    <line x1="250" y1="100" x2="400" y2="225" />
+                    <line x1="250" y1="350" x2="400" y2="225" />
+                    <line x1="700" y1="225" x2="550" y2="100" />
+                    <line x1="700" y1="225" x2="550" y2="350" />
+                    <line x1="550" y1="100" x2="400" y2="225" />
+                    <line x1="550" y1="350" x2="400" y2="225" />
+                    <line x1="250" y1="100" x2="550" y2="100" strokeDasharray="8 8" />
+                    <line x1="250" y1="350" x2="550" y2="350" strokeDasharray="8 8" />
+                </g>
+                <g>
+                    <circle cx="100" cy="225" r="35" fill="white" stroke="#2563eb" strokeWidth="4" />
+                    <circle cx="100" cy="225" r="15" fill="#3b82f6" />
+                    <text x="100" y="280" textAnchor="middle" className="text-xs font-bold fill-slate-600" style={{fontSize: '14px', fontWeight: 'bold'}}>Blue HQ</text>
+                </g>
+                <g>
+                    <circle cx="700" cy="225" r="35" fill="white" stroke="#dc2626" strokeWidth="4" />
+                    <circle cx="700" cy="225" r="15" fill="#ef4444" />
+                    <text x="700" y="280" textAnchor="middle" className="text-xs font-bold fill-slate-600" style={{fontSize: '14px', fontWeight: 'bold'}}>Red HQ</text>
+                </g>
+                <g>
+                    <circle cx="400" cy="225" r="25" fill="white" stroke="#64748b" strokeWidth="3" />
+                    <text x="400" y="225" dy="5" textAnchor="middle" fill="#64748b" style={{fontSize: '12px', fontWeight: 'bold'}}>CENTER</text>
+                </g>
+                <g>
+                    <circle cx="250" cy="100" r="25" fill="white" stroke="#3b82f6" strokeWidth="3" />
+                    <text x="250" y="100" dy="5" textAnchor="middle" fill="#3b82f6" style={{fontSize: '10px', fontWeight: 'bold'}}>AREA A</text>
+                </g>
+                <g>
+                    <circle cx="250" cy="350" r="25" fill="white" stroke="#3b82f6" strokeWidth="3" />
+                    <text x="250" y="350" dy="5" textAnchor="middle" fill="#3b82f6" style={{fontSize: '10px', fontWeight: 'bold'}}>AREA B</text>
+                </g>
+                <g>
+                    <circle cx="550" cy="100" r="25" fill="white" stroke="#ef4444" strokeWidth="3" />
+                    <text x="550" y="100" dy="5" textAnchor="middle" fill="#ef4444" style={{fontSize: '10px', fontWeight: 'bold'}}>AREA C</text>
+                </g>
+                <g>
+                    <circle cx="550" cy="350" r="25" fill="white" stroke="#ef4444" strokeWidth="3" />
+                    <text x="550" y="350" dy="5" textAnchor="middle" fill="#ef4444" style={{fontSize: '10px', fontWeight: 'bold'}}>AREA D</text>
+                </g>
+                <g transform="translate(650, 400)">
+                    <rect x="0" y="0" width="140" height="40" fill="white" stroke="#e2e8f0" rx="4" />
+                    <circle cx="20" cy="20" r="6" fill="#3b82f6" />
+                    <text x="35" y="24" style={{fontSize: '10px'}} fill="#475569">Blue Route</text>
+                    <circle cx="80" cy="20" r="6" fill="#ef4444" />
+                    <text x="95" y="24" style={{fontSize: '10px'}} fill="#475569">Red Route</text>
+                </g>
+            </svg>
+        );
+
+        // --- 仕様書サンプルのデータ ---
+        const SPEC_SAMPLE = {
+            title: "新規大規模GvGイベント「エリア制圧戦」詳細仕様書",
+            sections: [
+                {
+                    heading: "1. 企画意図・目的",
+                    content: [
+                        { label: "プロジェクト上の意義", text: "本タイトルは市場において後発となるため、既存のGvGコンテンツとの差別化が必須課題である。単なるパラメータの殴り合いではなく、「マップ移動」と「補給線（ライン）」の概念を取り入れた戦略的な陣取り合戦により、競争優位性を確立する。" },
+                        { label: "ゲームデザインの狙い", text: "ゲームサイクルのゴール（エンドコンテンツ）を明確化し、ユーザーに「デッキ強化の動機」を与える。特に、攻撃部隊だけでなく防衛部隊の育成意義を持たせることで、キャラクター需要の多様化とARPPU向上を狙う。" }
+                    ]
+                },
+                {
+                    heading: "2. イベント概要・基本サイクル",
+                    content: [
+                        { label: "概要", text: "2つの本拠地（Headquarters）と5つの中立拠点が配置されたマップ上で行う、チーム対抗のリアルタイム総力戦。制限時間内により多くの「貢献Pt」を稼いだチームが勝利となる。" },
+                        { label: "開催スケジュール", text: "1日5ラウンド制（各ラウンド2～8時間）。ラウンドごとに貢献Ptはリセットされるが、勝敗結果は蓄積され、最終的なイベント順位に影響する。" },
+                        { label: "勝敗決定ロジック", text: "両チームの獲得Ptを比較し、高い方を勝利とする。同数の場合は「最後にアクション（制圧・防衛・補強）を行ったチーム」を勝利とする（最後までアクティブに行動した側を優遇）。" }
+                    ]
+                },
+                {
+                    heading: "3. フィールド移動・補給線仕様",
+                    content: [
+                        { label: "移動ルール", text: "ユーザーは拠点間を「移動」コマンドで移動する。移動先は「自軍の支配下にある拠点」または「自軍拠点とルートで直接つながっている隣接拠点」に限定される。" },
+                        { 
+                            label: "【仕様策定メモ】移動仕様の変遷", 
+                            text: "当初は「常に隣接マスのみ移動可」の仕様を検討していたが、本拠地から前線までの復帰に時間がかかりすぎ（20分以上）、後半の逆転が不可能になる懸念が生じた。そのため、自軍支配下のルート（補給線）が繋がっている限り、遠方の拠点へも1アクションで移動可能な「ハイウェイ方式」を採用した。",
+                            isMemo: true
+                        },
+                        { label: "拠点占有権の推移", text: "中立拠点は「早い者勝ち」で占有権を得る。敵軍拠点は、耐久値を0にすることで「陥落」させ、自軍の占有下に置くことができる。" }
+                    ]
+                },
+                {
+                    heading: "4. バトル・パラメーター詳細設計",
+                    content: [
+                        { label: "拠点耐久度（Base HP）", text: "各拠点には耐久度が存在する。陥落するたびに拠点Lvが上昇し、最大耐久度が増加する（後半になるほど拠点が堅くなり、膠着状態を打破する難易度が上がる設計）。" },
+                        { label: "アクション別 係数設計", text: "攻撃側（Attack）はダメージ効率を高く、防衛側（Defense）は回復効率を低めに設定。基本的には「攻め有利」のバランスとし、防衛側は数で守る必要があるように調整する。" },
+                        { 
+                            label: "【仕様策定メモ】防衛側のメリット", 
+                            text: "防衛（修理）アクションは、攻撃に比べてPt効率は劣るものの、「デッキ強度の影響を受けにくい」計算式を採用する。これにより、ライトユーザーや低レベル帯のユーザーでも「壁役」として貢献できる役割を持たせる。",
+                            isMemo: true
+                        }
+                    ]
+                },
+                {
+                    heading: "5. マップ・レベルデザイン",
+                    hasMap: true,
+                    imageCaption: "図1. 拠点ネットワークと補給線の概念図（赤：敵軍 / 青：自軍）",
+                    content: [
+                        { label: "ラウンドによるマップ変化", text: "イベントの進行度（ラウンド数）に応じて、マップ構造と拠点数を変化させる。" },
+                        { label: "【序盤】直線型", text: "★－◇－★ （拠点数少・一本道）：まずは「殴り合う」こと自体を学習させるフェーズ。" },
+                        { label: "【中盤】分岐型", text: "★－〇－〇－★ （ルート分岐あり）：裏取りや陽動の戦略性を学習させる。" },
+                        { label: "【終盤】網目型", text: "複数のルートが複雑に絡み合う形状。補給線断絶（包囲）を狙いやすい構造とし、高度な連携プレイを要求する。" }
+                    ]
+                },
+                {
+                    heading: "6. 特殊ルール・エッジケース処理",
+                    content: [
+                        { label: "補給線断絶（Supply Cut）", text: "本拠地とのルート接続が絶たれた拠点は、耐久度が残っていても強制的に「陥落」扱いとする。これにより「敵の主力を正面で引きつけつつ、別動隊が補給線を切る」という高度な戦略性を担保する。" },
+                        { label: "強制撤退処理", text: "拠点が陥落した際、その拠点に滞在していた防衛側ユーザーは強制的に本拠地へ移動（撤退）となる。移動クールタイムはリセットされないため、前線復帰には時間を要する（デスペナルティ）。" },
+                        { label: "コンボボーナス", text: "同一拠点に対し、5分以内に味方が連続してアクションを行うと「連携数」加算。50コンボごとに「ラッシュモード」が発動し、該当拠点での全ステータスが20%上昇する。" }
+                    ]
+                }
+            ],
+            codeSnippet: `// 獲得貢献Pt(Contribution Point)計算ロジック
+function calculateContributionPoint(actionType, userDeck, enemyInfo) {
+  // 1. 基礎値算出（デッキ戦力依存）
+  let basePoint = userDeck.totalPower * 0.02;
+
+  // 2. アクションタイプ補正
+  // 攻撃は高く、防衛(修理)は低く設定してアクティブな展開を推奨
+  const actionMultiplier = {
+    'ATTACK': 1.0,  // 攻撃
+    'DEFENSE': 0.8, // 防衛迎撃
+    'REPAIR': 0.6   // 拠点修理（戦闘なし）
+  };
+  basePoint *= actionMultiplier[actionType];
+
+  // 3. 勝敗補正（PvP発生時）
+  // 負けても最低限(30%)のPtは保証し、参加モチベーションを維持
+  if (enemyInfo && enemyInfo.isPlayer) {
+    const isWin = battleSimulation(userDeck, enemyInfo.deck);
+    basePoint *= (isWin ? 1.0 : 0.3);
+  }
+
+  // 4. 連勝/コンボ補正・乱数揺らぎ
+  // 特攻ユニット(EventBonusUnit)がいれば最終倍率に乗算
+  let finalPoint = basePoint * getComboBonus() * getRandomFactor(0.9, 1.1);
+  
+  if (userDeck.hasEventUnit) {
+    finalPoint *= userDeck.eventUnitBonus;
+  }
+
+  return Math.floor(finalPoint);
+}`
+        };
+
+        const Portfolio = () => {
+            const [showModal, setShowModal] = useState(false);
+
+            useEffect(() => {
+                if (showModal) {
+                    document.body.classList.add('modal-open');
+                } else {
+                    document.body.classList.remove('modal-open');
+                }
+            }, [showModal]);
+
+            return (
+                <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-100">
+                    {/* Navigation / Header */}
+                    <header className="fixed top-0 w-full bg-white/90 backdrop-blur-sm border-b border-slate-200 z-50 shadow-sm">
+                        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+                            <div className="font-bold text-xl tracking-tight text-slate-900">
+                                S.Tomohiro <span className="text-blue-600">.</span>
+                            </div>
+                            <nav className="hidden md:flex gap-6 text-sm font-medium text-slate-600">
+                                <a href="#about" className="hover:text-blue-600 transition-colors">About</a>
+                                <a href="#focus" className="hover:text-blue-600 transition-colors">Case Studies</a>
+                                <a href="#career" className="hover:text-blue-600 transition-colors">Career</a>
+                                <a href="#works" className="hover:text-blue-600 transition-colors">Works</a>
+                            </nav>
+                        </div>
+                    </header>
+
+                    {/* Hero Section */}
+                    <section className="pt-32 pb-20 px-6 bg-gradient-to-b from-white to-slate-100">
+                        <div className="max-w-4xl mx-auto text-center">
+                            
+                            {/* Adjusted Name Size */}
+                            <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
+                                佐藤 知宏
+                                <span className="block text-lg md:text-xl text-slate-400 font-medium mt-2 tracking-normal">Sato Tomohiro</span>
+                            </h1>
+                            
+                            {/* Adjusted Title */}
+                            <div className="inline-block px-3 py-1 mb-8 text-xs font-semibold tracking-wider text-blue-600 uppercase bg-blue-50 rounded-full border border-blue-100">
+                                Game Planner
+                            </div>
+                            
+                            <h2 className="text-2xl md:text-4xl font-bold text-slate-800 mb-6 leading-tight">
+                                データ分析に基づく<span className="text-blue-600">「運営改善」</span>と<br className="hidden md:block" />
+                                生成AIによる<span className="text-blue-600">「開発効率化」</span>
+                            </h2>
+                            
+                            <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+                                12年のキャリアと最新技術で、タイトルのポテンシャルを最大化する。<br />
+                                数値を読み解く力と実装力で、チームを成功へ導きます。
+                            </p>
+                            
+                            <div className="flex justify-center gap-4">
+                                <a href="#focus" className="px-8 py-3 bg-blue-600 text-white rounded-lg font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all hover:-translate-y-0.5">
+                                    実績を見る
+                                </a>
+                                <a href="#about" className="px-8 py-3 bg-white text-slate-700 border border-slate-300 rounded-lg font-bold hover:bg-slate-50 transition-all">
+                                    プロフィール
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Profile & Skills */}
+                    <section id="about" className="py-20 px-6 bg-white">
+                        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-start">
+                            <div>
+                                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                                    <span className="w-8 h-1 bg-blue-600 rounded-full"></span>
+                                    Profile
+                                </h2>
+                                <div className="mb-6">
+                                    <p className="text-lg font-bold text-slate-800">佐藤 知宏 <span className="text-slate-400 font-normal text-sm ml-2">/ Sato Tomohiro</span></p>
+                                    <p className="text-slate-500 text-sm flex items-center gap-4 mt-2">
+                                        <span className="flex items-center gap-1"><Icons.MapPin className="w-3 h-3" /> Tokyo, Japan</span>
+                                    </p>
+                                </div>
+                                <p className="text-slate-600 leading-relaxed mb-6">
+                                    MMORPG運営会社にてキャリアをスタートし、その後ソーシャルゲームプランナーとして約12年の経験を蓄積。
+                                    運営・新規開発・受託・自社開発と幅広い環境で、KPI分析に基づく施策立案やレベルデザインを担当してきました。
+                                </p>
+                                <p className="text-slate-600 leading-relaxed">
+                                    特に「運営の立て直し」や「長期運営タイトルの活性化」に強みを持ちます。
+                                    近年は画像生成AI（Stable Diffusion）の導入やUnityによる演出実装など、技術的なアプローチによる業務効率化も積極的に推進しています。
+                                </p>
+                            </div>
+                            
+                            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                <h3 className="font-bold text-slate-900 mb-4">Core Skills</h3>
+                                
+                                <div className="mb-6">
+                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Planning & Operation</div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['仕様作成', 'KPI分析・改善', 'レベルデザイン', 'ガチャ確率設計', 'マスターデータ管理', '進行管理'].map(skill => (
+                                            <span key={skill} className="px-3 py-1 bg-white border border-slate-200 rounded text-sm text-slate-700 shadow-sm">
+                                                {skill}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="mb-6">
+                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Technical & Tools</div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Unity', 'Stable Diffusion', 'Prompt Engineering', 'LoRA Fine-tuning', 'Git / SVN', 'Redmine / JIRA', 'Excel (VBA)', 'Google Analytics'].map(skill => (
+                                            <span key={skill} className="px-3 py-1 bg-blue-50 border border-blue-100 rounded text-sm text-blue-800 font-medium">
+                                                {skill}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Focus / Case Studies */}
+                    <section id="focus" className="py-20 px-6 bg-slate-50">
+                        <div className="max-w-5xl mx-auto">
+                            <div className="text-center mb-16">
+                                <h2 className="text-3xl font-bold text-slate-900 mb-4">Case Studies</h2>
+                                <p className="text-slate-600">課題解決と成果のハイライト</p>
+                            </div>
+
+                            <div className="grid gap-12">
+                                {/* Case 1: AI */}
+                                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8 transition-transform hover:-translate-y-1 duration-300">
+                                    <div className="md:w-1/3 flex flex-col items-center justify-center bg-blue-50 rounded-xl p-8 border border-blue-100 text-center">
+                                        <Icons.Cpu className="w-16 h-16 text-blue-600 mb-4" />
+                                        <h3 className="font-bold text-xl text-blue-900">AI Technology</h3>
+                                        <p className="text-sm text-blue-700 mt-2">最新技術による生産性革命</p>
+                                    </div>
+                                    <div className="md:w-2/3">
+                                        <h3 className="text-2xl font-bold mb-2">開発フローへの画像生成AI導入</h3>
+                                        <p className="text-sm text-slate-500 mb-6 font-mono">Project: STELLAR IDOL PROJECT (2024 - Present)</p>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                                                    <Icons.Zap className="w-4 h-4 text-amber-500" /> 課題
+                                                </h4>
+                                                <p className="text-slate-600 text-sm mt-1">開発・運営業務と並行し、制作工数の削減とクオリティ維持の両立が必要。</p>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                                                    <Icons.Layout className="w-4 h-4 text-blue-500" /> 取り組み
+                                                </h4>
+                                                <ul className="list-disc list-inside text-slate-600 text-sm mt-1 space-y-1 ml-1">
+                                                    <li>ローカル生成環境（Stable Diffusion）の構築とモデル選定</li>
+                                                    <li>背景・アイテム素材の生成および加筆フローの確立</li>
+                                                    <li>プロンプト管理のマニュアル化によるチーム全体のスキル底上げ</li>
+                                                </ul>
+                                            </div>
+                                            <div className="bg-slate-100 p-4 rounded-lg mt-2">
+                                                <p className="text-sm font-bold text-slate-800">✨ Result</p>
+                                                <p className="text-sm text-slate-600">プランナー業務を行いつつ、アセット制作の工数を大幅削減し、クオリティアップに貢献。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Case 2: Guild */}
+                                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8 transition-transform hover:-translate-y-1 duration-300">
+                                    <div className="md:w-1/3 flex flex-col items-center justify-center bg-indigo-50 rounded-xl p-8 border border-indigo-100 text-center">
+                                        <Icons.Users className="w-16 h-16 text-indigo-600 mb-4" />
+                                        <h3 className="font-bold text-xl text-indigo-900">Community</h3>
+                                        <p className="text-sm text-indigo-700 mt-2">エンゲージメントの再構築</p>
+                                    </div>
+                                    <div className="md:w-2/3">
+                                        <h3 className="text-2xl font-bold mb-2">長期運営タイトルの活性化施策</h3>
+                                        <p className="text-sm text-slate-500 mb-6 font-mono">Project: 10年超の長寿タイトル運営</p>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                                                    <Icons.Zap className="w-4 h-4 text-amber-500" /> 課題
+                                                </h4>
+                                                <p className="text-slate-600 text-sm mt-1">運営の長期化に伴うマンネリ化。個人イベントへの参加率・継続率の停滞。</p>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                                                    <Icons.Layout className="w-4 h-4 text-blue-500" /> 施策：競争と協力のサイクル
+                                                </h4>
+                                                <ul className="list-disc list-inside text-slate-600 text-sm mt-1 space-y-1 ml-1">
+                                                    <li><strong>「個」から「集団」へ：</strong>個人ポイントをギルド合算で競う仕組みを導入</li>
+                                                    <li><strong>循環型メリット：</strong>報酬に「ギルド恩恵（バフ・称号）」を設定。「勝利→バフ獲得で効率化→次も上位へ」のサイクル構築</li>
+                                                </ul>
+                                            </div>
+                                            <div className="bg-slate-100 p-4 rounded-lg mt-2">
+                                                <p className="text-sm font-bold text-slate-800">✨ Result</p>
+                                                <p className="text-sm text-slate-600">参加率・KPIが前月比で大幅向上。定期的な目標更新によりアクティブベースを底上げ。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Case 3: Sales */}
+                                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8 transition-transform hover:-translate-y-1 duration-300">
+                                    <div className="md:w-1/3 flex flex-col items-center justify-center bg-emerald-50 rounded-xl p-8 border border-emerald-100 text-center">
+                                        <Icons.TrendingUp className="w-16 h-16 text-emerald-600 mb-4" />
+                                        <h3 className="font-bold text-xl text-emerald-900">Monetization</h3>
+                                        <p className="text-sm text-emerald-700 mt-2">消費導線の最適化</p>
+                                    </div>
+                                    <div className="md:w-2/3">
+                                        <h3 className="text-2xl font-bold mb-2">消費行動改善によるARPU最大化</h3>
+                                        <p className="text-sm text-slate-500 mb-6 font-mono">Project: 10年超の長寿タイトル運営</p>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                                                    <Icons.Zap className="w-4 h-4 text-amber-500" /> 課題
+                                                </h4>
+                                                <p className="text-slate-600 text-sm mt-1">高ランクユーザーのポイント獲得効率頭打ちによる、消費の伸び悩み。</p>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                                                    <Icons.Layout className="w-4 h-4 text-blue-500" /> 施策：消費の高速化と高付加価値化
+                                                </h4>
+                                                <ul className="list-disc list-inside text-slate-600 text-sm mt-1 space-y-1 ml-1">
+                                                    <li><strong>ボトルネック解消：</strong>「複数個同時消費」機能の実装で時間効率を劇的改善</li>
+                                                    <li><strong>予測シナリオ：</strong>消費速度UP → 順位争いのヒートアップ（短時間化） → 購入増を設計</li>
+                                                    <li><strong>高付加価値化：</strong>「時短」価値を持つ上位アイテムを販売・報酬に展開</li>
+                                                </ul>
+                                            </div>
+                                            <div className="bg-slate-100 p-4 rounded-lg mt-2">
+                                                <p className="text-sm font-bold text-slate-800">✨ Result</p>
+                                                <p className="text-sm text-slate-600">予測通り順位争いが活性化。実装直後のイベントにて大幅な売上増を達成。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Career Timeline */}
+                    <section id="career" className="py-20 px-6 bg-white">
+                        <div className="max-w-4xl mx-auto">
+                            <h2 className="text-3xl font-bold text-slate-900 mb-12 flex items-center gap-3">
+                                <Icons.Briefcase className="text-blue-600" />
+                                Career History
+                            </h2>
+
+                            <div className="relative border-l-2 border-slate-200 ml-3 space-y-12 pb-8">
+                                {/* Item 1 */}
+                                <div className="relative pl-8 md:pl-12">
+                                    <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-sm"></div>
+                                    <div className="mb-2 text-sm text-blue-600 font-bold">2024.01 - Present</div>
+                                    <h3 className="text-xl font-bold text-slate-900">STELLAR IDOL PROJECT</h3>
+                                    <p className="text-slate-500 text-sm mb-3">放置型アイドル育成ゲーム / チーム26名</p>
+                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                        新規開発〜運営。ADVパート制作、販売物計画、マスターデータ作成。
+                                        画像生成AI環境の構築・運用による効率化を推進。
+                                    </p>
+                                </div>
+                                {/* Item 2 */}
+                                <div className="relative pl-8 md:pl-12">
+                                    <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-300 border-4 border-white"></div>
+                                    <div className="mb-2 text-sm text-slate-500 font-bold">2019.06 - 2024.01</div>
+                                    <h3 className="text-xl font-bold text-slate-900">戦国キングダム</h3>
+                                    <p className="text-slate-500 text-sm mb-3">戦国カードバトルRPG / チーム12-16名</p>
+                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                        長期運営におけるイベント・ガチャ企画、KPI分析。データ作成フローの効率化を実施。
+                                    </p>
+                                </div>
+                                {/* Item 3 */}
+                                <div className="relative pl-8 md:pl-12">
+                                    <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-300 border-4 border-white"></div>
+                                    <div className="mb-2 text-sm text-slate-500 font-bold">2015.07 - 2019.06</div>
+                                    <h3 className="text-xl font-bold text-slate-900">戦乱プリンセス</h3>
+                                    <p className="text-slate-500 text-sm mb-3">PC・スマホRPG / チーム15-20名</p>
+                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                        システム・イベント立案、仕様作成。KPI分析に基づく課金施策の改善。
+                                    </p>
+                                </div>
+                                {/* Item 4 */}
+                                <div className="relative pl-8 md:pl-12">
+                                    <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-300 border-4 border-white"></div>
+                                    <div className="mb-2 text-sm text-slate-500 font-bold">2014.04 - 2015.02</div>
+                                    <h3 className="text-xl font-bold text-slate-900">猫耳さばいばー</h3>
+                                    <p className="text-slate-500 text-sm mb-3">新規オリジナルRPG / メインプランナー</p>
+                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                        メインプランナーとして仕様、世界観、シナリオを担当。Unityでのスクリプト演出実装も兼務。
+                                    </p>
+                                </div>
+                                {/* Item 5 */}
+                                <div className="relative pl-8 md:pl-12">
+                                    <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-300 border-4 border-white"></div>
+                                    <div className="mb-2 text-sm text-slate-500 font-bold">2012.09 - 2013.09</div>
+                                    <h3 className="text-xl font-bold text-slate-900">有名ロボットIPソーシャルゲーム</h3>
+                                    <p className="text-slate-500 text-sm mb-3">カードバトルRPG / チーム26名</p>
+                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                        エンジニアと連携しサーバ負荷課題を解決するUI施策を実施、売上昨対比150%を達成。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Works Samples */}
+                    <section id="works" className="py-20 px-6 bg-slate-50">
+                        <div className="max-w-5xl mx-auto">
+                            <h2 className="text-3xl font-bold text-slate-900 mb-12 flex items-center gap-3">
+                                <Icons.FileText className="text-blue-600" />
+                                Works Samples
+                            </h2>
+
+                            <div className="flex justify-center">
+                                <button 
+                                    onClick={() => setShowModal(true)}
+                                    className="group bg-white p-6 rounded-xl border border-slate-200 hover:shadow-lg hover:border-blue-300 transition-all text-left w-full max-w-2xl"
+                                >
+                                    <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg mb-4 flex items-center justify-center border-2 border-dashed border-slate-200 group-hover:border-blue-300 transition-colors relative overflow-hidden">
+                                        <div className="absolute inset-0 opacity-10 flex flex-col gap-2 p-4">
+                                            <div className="h-2 bg-slate-400 rounded w-3/4"></div>
+                                            <div className="h-2 bg-slate-400 rounded w-1/2"></div>
+                                            <div className="h-2 bg-slate-400 rounded w-full"></div>
+                                            <div className="h-2 bg-slate-400 rounded w-2/3"></div>
+                                        </div>
+                                        <div className="text-center z-10 flex flex-col items-center">
+                                            <Icons.FileText className="w-10 h-10 mx-auto mb-3 text-blue-500" />
+                                            <span className="text-sm font-bold text-slate-600 bg-white/80 px-3 py-1 rounded-full">
+                                                クリックして仕様書を見る
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <h3 className="font-bold text-lg mb-2 flex items-center gap-2 group-hover:text-blue-600 transition-colors">
+                                        詳細仕様書サンプル：大規模エリア制圧戦 <Icons.ExternalLink className="w-4 h-4" />
+                                    </h3>
+                                    <p className="text-sm text-slate-600">
+                                        GvGイベントの詳細仕様書サンプル。目的定義からマップレベルデザイン、移動ロジックや計算式などの内部パラメータ設計まで、実装を意識したドキュメント。
+                                    </p>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <footer className="py-20 px-6 bg-slate-900 text-white text-center">
+                        <div className="max-w-3xl mx-auto flex flex-col items-center">
+                            <Icons.Award className="w-12 h-12 text-blue-500 mx-auto mb-6" />
+                            <h2 className="text-2xl md:text-3xl font-bold mb-6">
+                                「確かな運営力」と「新しい技術」で、<br />
+                                チームの可能性を広げる。
+                            </h2>
+                            <p className="text-slate-300 leading-relaxed mb-10">
+                                これまでの知見と技術を活かし、貴社のプロジェクトにおいて<br className="hidden md:block" />
+                                即戦力として収益貢献および制作フローの最適化に尽力いたします。
+                            </p>
+                        </div>
+                    </footer>
+
+                    {/* Document Modal */}
+                    {showModal && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                            <div 
+                                className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                                onClick={() => setShowModal(false)}
+                            ></div>
+                            <div className="bg-white w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl flex flex-col relative fade-in">
+                                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                                            <Icons.FileText className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-slate-900">仕様書サンプル</h3>
+                                            <div className="text-xs text-slate-500 leading-relaxed max-w-xl">
+                                                <p>※本資料は実務で使用した仕様書を基に、守秘義務に配慮して再構成・匿名化したものです。<br/>数値や名称はダミーですが、実際の業務における設計粒度や論理構造を示すサンプルとしてご参照ください。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                                    >
+                                        <Icons.X className="w-6 h-6 text-slate-500" />
+                                    </button>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto p-8 md:p-12 bg-slate-50/50 scroll-smooth">
+                                    <div className="max-w-4xl mx-auto bg-white shadow-sm border border-slate-200 p-8 md:p-16 min-h-full">
+                                        
+                                        {/* Doc Title */}
+                                        <div className="border-b-2 border-slate-800 pb-6 mb-10">
+                                            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">{SPEC_SAMPLE.title}</h1>
+                                        </div>
+
+                                        <div className="space-y-12">
+                                            {SPEC_SAMPLE.sections.map((section, idx) => (
+                                                <section key={idx}>
+                                                    <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-6 flex items-center gap-2">
+                                                        <span className="text-blue-600">{idx + 1}.</span> {section.heading.split('. ')[1]}
+                                                    </h2>
+
+                                                    {section.hasMap && (
+                                                        <div className="mb-8 border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                                                            <SpecMap />
+                                                            {section.imageCaption && (
+                                                                <div className="bg-slate-50 p-3 text-xs text-center text-slate-500 font-medium border-t border-slate-200">
+                                                                    {section.imageCaption}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="space-y-8 pl-2 md:pl-4">
+                                                        {section.content.map((item, itemIdx) => (
+                                                            <div key={itemIdx} className={`relative ${item.isMemo ? 'bg-amber-50 p-6 rounded-lg border border-amber-200' : ''}`}>
+                                                                {item.isMemo && (
+                                                                    <div className="absolute -top-3 left-4 bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded border border-amber-200 flex items-center gap-1">
+                                                                        <Icons.Lock className="w-3 h-3" /> Planner's Note
+                                                                    </div>
+                                                                )}
+                                                                <h3 className={`font-bold text-sm mb-3 flex items-center gap-2 ${item.isMemo ? 'text-amber-900' : 'text-slate-800'}`}>
+                                                                    {!item.isMemo && <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>}
+                                                                    {item.label}
+                                                                </h3>
+                                                                <p className={`text-sm leading-7 ${item.isMemo ? 'text-amber-800' : 'text-slate-600 pl-4 border-l border-slate-100'}`}>
+                                                                    {item.text}
+                                                                </p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </section>
+                                            ))}
+
+                                            <section>
+                                                <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-6 flex items-center gap-2">
+                                                    <span className="text-blue-600">7.</span> ロジック実装イメージ
+                                                </h2>
+                                                <div className="bg-slate-900 text-slate-300 p-6 rounded-lg font-mono text-xs overflow-x-auto shadow-inner border border-slate-800">
+                                                    <pre>{SPEC_SAMPLE.codeSnippet}</pre>
+                                                </div>
+                                                <p className="text-xs text-slate-500 mt-2 text-right">※擬似コードによるロジック概要図</p>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-4 border-t border-slate-200 bg-white flex justify-end">
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shadow-lg"
+                                    >
+                                        閉じる
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Portfolio />);
+    </script>
+</body>
+</html>
