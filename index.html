@@ -9,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- React & Babel (CDN) -->
+    <!-- React 18 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <!-- Babel Standalone (v7) -->
@@ -30,28 +31,11 @@
             from { opacity: 0; transform: scale(0.98); }
             to { opacity: 1; transform: scale(1); }
         }
-
-        /* クリエイティブセクション用のカスタムスタイル */
-        .creative-card {
-            background-color: #1a1a1a;
-            color: #ffffff;
-        }
-        .creative-accent {
-            color: #22c55e; /* Green-500 */
-        }
-        
-        /* 印刷設定 */
-        @media print {
-            header, nav, .print-hidden { display: none !important; }
-            .page-break { break-before: always; }
-            body { background: white; color: black; }
-        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 selection:bg-blue-100">
     <div id="root"></div>
 
-    <!-- React Application Logic -->
     <script type="text/babel">
         const { useState, useEffect } = React;
 
@@ -74,10 +58,7 @@
             ExternalLink: (p) => <Icon {...p} path={<><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></>} />,
             Award: (p) => <Icon {...p} path={<><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></>} />,
             X: (p) => <Icon {...p} path={<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>} />,
-            Lock: (p) => <Icon {...p} path={<><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>} />,
-            Palette: (p) => <Icon {...p} path={<><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.03 0-.872.55-1.12 1.24-1.12H16c2.21 0 4-1.79 4-4 0-3.31-2.69-6-6-6z"/></>} />,
-            Code: (p) => <Icon {...p} path={<><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></>} />,
-            Play: (p) => <Icon {...p} path={<><polygon points="5 3 19 12 5 21 5 3"/></>} />
+            Lock: (p) => <Icon {...p} path={<><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>} />
         };
 
         // --- マップ画像のコンポーネント ---
@@ -251,7 +232,7 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
             return (
                 <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-blue-100">
                     {/* Navigation / Header */}
-                    <header className="fixed top-0 w-full bg-white/90 backdrop-blur-sm border-b border-slate-200 z-50 shadow-sm print:hidden">
+                    <header className="fixed top-0 w-full bg-white/90 backdrop-blur-sm border-b border-slate-200 z-50 shadow-sm">
                         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
                             <div className="font-bold text-xl tracking-tight text-slate-900">
                                 S.Tomohiro <span className="text-blue-600">.</span>
@@ -261,7 +242,6 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                                 <a href="#focus" className="hover:text-blue-600 transition-colors">Case Studies</a>
                                 <a href="#career" className="hover:text-blue-600 transition-colors">Career</a>
                                 <a href="#works" className="hover:text-blue-600 transition-colors">Works</a>
-                                <a href="#creative" className="hover:text-blue-600 transition-colors">Creative</a>
                             </nav>
                         </div>
                     </header>
@@ -270,11 +250,13 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                     <section className="pt-32 pb-20 px-6 bg-gradient-to-b from-white to-slate-100">
                         <div className="max-w-4xl mx-auto text-center">
                             
+                            {/* Adjusted Name Size */}
                             <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
                                 佐藤 知宏
                                 <span className="block text-lg md:text-xl text-slate-400 font-medium mt-2 tracking-normal">Sato Tomohiro</span>
                             </h1>
                             
+                            {/* Adjusted Title */}
                             <div className="inline-block px-3 py-1 mb-8 text-xs font-semibold tracking-wider text-blue-600 uppercase bg-blue-50 rounded-full border border-blue-100">
                                 Game Planner
                             </div>
@@ -289,7 +271,7 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                                 数値を読み解く力と実装力で、チームを成功へ導きます。
                             </p>
                             
-                            <div className="flex justify-center gap-4 print:hidden">
+                            <div className="flex justify-center gap-4">
                                 <a href="#focus" className="px-8 py-3 bg-blue-600 text-white rounded-lg font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all hover:-translate-y-0.5">
                                     実績を見る
                                 </a>
@@ -301,7 +283,7 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                     </section>
 
                     {/* Profile & Skills */}
-                    <section id="about" className="py-20 px-6 bg-white page-break">
+                    <section id="about" className="py-20 px-6 bg-white">
                         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-start">
                             <div>
                                 <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
@@ -353,7 +335,7 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                     </section>
 
                     {/* Focus / Case Studies */}
-                    <section id="focus" className="py-20 px-6 bg-slate-50 page-break">
+                    <section id="focus" className="py-20 px-6 bg-slate-50">
                         <div className="max-w-5xl mx-auto">
                             <div className="text-center mb-16">
                                 <h2 className="text-3xl font-bold text-slate-900 mb-4">Case Studies</h2>
@@ -362,7 +344,7 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
 
                             <div className="grid gap-12">
                                 {/* Case 1: AI */}
-                                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8">
+                                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8 transition-transform hover:-translate-y-1 duration-300">
                                     <div className="md:w-1/3 flex flex-col items-center justify-center bg-blue-50 rounded-xl p-8 border border-blue-100 text-center">
                                         <Icons.Cpu className="w-16 h-16 text-blue-600 mb-4" />
                                         <h3 className="font-bold text-xl text-blue-900">AI Technology</h3>
@@ -397,7 +379,7 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                                 </div>
 
                                 {/* Case 2: Guild */}
-                                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8 page-break">
+                                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8 transition-transform hover:-translate-y-1 duration-300">
                                     <div className="md:w-1/3 flex flex-col items-center justify-center bg-indigo-50 rounded-xl p-8 border border-indigo-100 text-center">
                                         <Icons.Users className="w-16 h-16 text-indigo-600 mb-4" />
                                         <h3 className="font-bold text-xl text-indigo-900">Community</h3>
@@ -431,14 +413,14 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                                 </div>
 
                                 {/* Case 3: Sales */}
-                                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8">
+                                <div className="bg-white rounded-2xl p-8 md:p-10 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8 transition-transform hover:-translate-y-1 duration-300">
                                     <div className="md:w-1/3 flex flex-col items-center justify-center bg-emerald-50 rounded-xl p-8 border border-emerald-100 text-center">
                                         <Icons.TrendingUp className="w-16 h-16 text-emerald-600 mb-4" />
                                         <h3 className="font-bold text-xl text-emerald-900">Monetization</h3>
                                         <p className="text-sm text-emerald-700 mt-2">消費導線の最適化</p>
                                     </div>
                                     <div className="md:w-2/3">
-                                        <h3 className="text-2xl font-bold mb-2">消費行動改善によるARPPU最大化</h3>
+                                        <h3 className="text-2xl font-bold mb-2">消費行動改善によるARPU最大化</h3>
                                         <p className="text-sm text-slate-500 mb-6 font-mono">Project: 10年超の長寿タイトル運営</p>
                                         <div className="space-y-4">
                                             <div>
@@ -469,10 +451,10 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                     </section>
 
                     {/* Career Timeline */}
-                    <section id="career" className="py-20 px-6 bg-white page-break">
+                    <section id="career" className="py-20 px-6 bg-white">
                         <div className="max-w-4xl mx-auto">
                             <h2 className="text-3xl font-bold text-slate-900 mb-12 flex items-center gap-3">
-                                <span className="text-blue-600"><Icons.Briefcase width="32" height="32" /></span>
+                                <Icons.Briefcase className="text-blue-600" />
                                 Career History
                             </h2>
 
@@ -533,18 +515,17 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                     </section>
 
                     {/* Works Samples */}
-                    <section id="works" className="py-20 px-6 bg-slate-50 page-break">
+                    <section id="works" className="py-20 px-6 bg-slate-50">
                         <div className="max-w-5xl mx-auto">
                             <h2 className="text-3xl font-bold text-slate-900 mb-12 flex items-center gap-3">
-                                <span className="text-blue-600"><Icons.FileText width="32" height="32" /></span>
+                                <Icons.FileText className="text-blue-600" />
                                 Works Samples
                             </h2>
 
                             <div className="flex justify-center">
-                                {/* Trigger Button (印刷時は非表示) */}
                                 <button 
                                     onClick={() => setShowModal(true)}
-                                    className="group bg-white p-6 rounded-xl border border-slate-200 hover:shadow-lg hover:border-blue-300 transition-all text-left w-full max-w-2xl cursor-pointer print:hidden"
+                                    className="group bg-white p-6 rounded-xl border border-slate-200 hover:shadow-lg hover:border-blue-300 transition-all text-left w-full max-w-2xl"
                                 >
                                     <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg mb-4 flex items-center justify-center border-2 border-dashed border-slate-200 group-hover:border-blue-300 transition-colors relative overflow-hidden">
                                         <div className="absolute inset-0 opacity-10 flex flex-col gap-2 p-4">
@@ -554,7 +535,7 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                                             <div className="h-2 bg-slate-400 rounded w-2/3"></div>
                                         </div>
                                         <div className="text-center z-10 flex flex-col items-center">
-                                            <span className="text-blue-500 mb-3"><Icons.FileText width="40" height="40" /></span>
+                                            <Icons.FileText className="w-10 h-10 mx-auto mb-3 text-blue-500" />
                                             <span className="text-sm font-bold text-slate-600 bg-white/80 px-3 py-1 rounded-full">
                                                 クリックして仕様書を見る
                                             </span>
@@ -571,85 +552,10 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                         </div>
                     </section>
 
-                    {/* Creative & Design (External Link) */}
-                    <section id="creative" className="py-20 px-6 bg-white page-break">
-                        <div className="max-w-5xl mx-auto">
-                            <h2 className="text-3xl font-bold text-slate-900 mb-12 flex items-center gap-3">
-                                <span className="text-blue-600"><Icons.Palette width="32" height="32" /></span>
-                                Creative Work & Design
-                            </h2>
-
-                            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row">
-                                {/* Preview Area */}
-                                <div className="md:w-1/2 creative-card p-8 flex flex-col justify-center items-center min-h-[300px] relative overflow-hidden group">
-                                    {/* Simulated Slide Content */}
-                                    <div className="z-10 text-center">
-                                        <div className="text-xs tracking-[0.2em] creative-accent mb-2 font-mono">PRESENTATION</div>
-                                        <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">MY FAVORITE THINGS</h3>
-                                        <div className="w-12 h-1 bg-white mx-auto mb-6"></div>
-                                        <p className="text-gray-400 text-sm font-mono">INTERACTIVE SLIDE DECK</p>
-                                    </div>
-                                    
-                                    {/* Decorative Elements */}
-                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-50"></div>
-                                    <div className="absolute bottom-10 right-10 w-32 h-32 rounded-full border border-white/5 pointer-events-none group-hover:scale-150 transition-transform duration-700"></div>
-                                </div>
-
-                                {/* Content Area */}
-                                <div className="md:w-1/2 p-8 md:p-10 flex flex-col justify-center">
-                                    <div className="mb-6">
-                                        <h3 className="text-xl font-bold text-slate-900 mb-2">構成力・デザイン・実装力の統合アピール</h3>
-                                        <p className="text-sm text-slate-500">社内勉強会用プレゼン資料（独自実装）</p>
-                                    </div>
-                                    
-                                    <p className="text-slate-600 text-sm leading-7 mb-6">
-                                        社内LT大会のために作成した「好きなもの」を紹介するプレゼンテーション資料。
-                                        既存のツール（PowerPoint等）を使用せず、HTML/CSS/JSで独自のスライドシステムを構築。
-                                        「対象の魅力を最大化する演出」と「没入感のある閲覧体験」を、エンジニアリングとデザインの両面からアプローチして実現しました。
-                                    </p>
-
-                                    <div className="space-y-3 mb-8">
-                                        <div className="flex items-start gap-3">
-                                            <span className="text-blue-600 mt-0.5"><Icons.Zap width="16" height="16" /></span>
-                                            <div>
-                                                <strong className="text-sm text-slate-800 block">構成力 (Storytelling)</strong>
-                                                <span className="text-xs text-slate-500">限られた時間で聴衆を引き込む起承転結の構成とライティング。</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3">
-                                            <span className="text-blue-600 mt-0.5"><Icons.Layout width="16" height="16" /></span>
-                                            <div>
-                                                <strong className="text-sm text-slate-800 block">デザイン力 (Visual Design)</strong>
-                                                <span className="text-xs text-slate-500">コンテンツの世界観（ダーク/ゴシック）をWebデザインとして再構築。</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3">
-                                            <span className="text-blue-600 mt-0.5"><Icons.Code width="16" height="16" /></span>
-                                            <div>
-                                                <strong className="text-sm text-slate-800 block">実装力 (Prototyping)</strong>
-                                                <span className="text-xs text-slate-500">JSによるスワイプ操作やページ遷移アニメーションの実装。</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <a 
-                                        href="./sample_presentation.html" 
-                                        target="_blank"
-                                        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-bold w-fit print:hidden"
-                                    >
-                                        <Icons.ExternalLink width="16" height="16" />
-                                        実際の資料を見る (HTML)
-                                    </a>
-                                    <p className="text-xs text-slate-400 mt-2 print:hidden">※別タブで開きます。PC/SP両対応。</p>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
                     {/* Footer */}
-                    <footer className="py-20 px-6 bg-slate-900 text-white text-center page-break">
+                    <footer className="py-20 px-6 bg-slate-900 text-white text-center">
                         <div className="max-w-3xl mx-auto flex flex-col items-center">
-                            <div className="text-blue-500 mb-6"><Icons.Award width="48" height="48" /></div>
+                            <Icons.Award className="w-12 h-12 text-blue-500 mx-auto mb-6" />
                             <h2 className="text-2xl md:text-3xl font-bold mb-6">
                                 「確かな運営力」と「新しい技術」で、<br />
                                 チームの可能性を広げる。
@@ -661,112 +567,110 @@ function calculateContributionPoint(actionType, userDeck, enemyInfo) {
                         </div>
                     </footer>
 
-                    {/* Document Modal (Always Open for Print) */}
-                    <div id="spec-modal" className="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 print:relative print:block print:inset-auto print:p-0 print:z-auto">
-                        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm print:hidden" onclick="closeModal()"></div>
-                        <div className="bg-white w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl flex flex-col relative fade-in print:h-auto print:shadow-none print:w-full print:max-w-none">
-                            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 print:hidden">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                                        <Icons.FileText width="20" height="20" />
+                    {/* Document Modal */}
+                    {showModal && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                            <div 
+                                className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                                onClick={() => setShowModal(false)}
+                            ></div>
+                            <div className="bg-white w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl flex flex-col relative fade-in">
+                                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                                            <Icons.FileText className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-slate-900">仕様書サンプル</h3>
+                                            <div className="text-xs text-slate-500 leading-relaxed max-w-xl">
+                                                <p>※本資料は実務で使用した仕様書を基に、守秘義務に配慮して再構成・匿名化したものです。<br/>数値や名称はダミーですが、実際の業務における設計粒度や論理構造を示すサンプルとしてご参照ください。</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-slate-900">仕様書サンプル</h3>
-                                        <div className="text-xs text-slate-500 leading-relaxed max-w-xl">
-                                            <p>※本資料は実務で使用した仕様書を基に、守秘義務に配慮して再構成・匿名化したものです。<br/>数値や名称はダミーですが、実際の業務における設計粒度や論理構造を示すサンプルとしてご参照ください。</p>
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                                    >
+                                        <Icons.X className="w-6 h-6 text-slate-500" />
+                                    </button>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto p-8 md:p-12 bg-slate-50/50 scroll-smooth">
+                                    <div className="max-w-4xl mx-auto bg-white shadow-sm border border-slate-200 p-8 md:p-16 min-h-full">
+                                        
+                                        {/* Doc Title */}
+                                        <div className="border-b-2 border-slate-800 pb-6 mb-10">
+                                            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">{SPEC_SAMPLE.title}</h1>
+                                        </div>
+
+                                        <div className="space-y-12">
+                                            {SPEC_SAMPLE.sections.map((section, idx) => (
+                                                <section key={idx}>
+                                                    <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-6 flex items-center gap-2">
+                                                        <span className="text-blue-600">{idx + 1}.</span> {section.heading.split('. ')[1]}
+                                                    </h2>
+
+                                                    {section.hasMap && (
+                                                        <div className="mb-8 border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                                                            <SpecMap />
+                                                            {section.imageCaption && (
+                                                                <div className="bg-slate-50 p-3 text-xs text-center text-slate-500 font-medium border-t border-slate-200">
+                                                                    {section.imageCaption}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="space-y-8 pl-2 md:pl-4">
+                                                        {section.content.map((item, itemIdx) => (
+                                                            <div key={itemIdx} className={`relative ${item.isMemo ? 'bg-amber-50 p-6 rounded-lg border border-amber-200' : ''}`}>
+                                                                {item.isMemo && (
+                                                                    <div className="absolute -top-3 left-4 bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded border border-amber-200 flex items-center gap-1">
+                                                                        <Icons.Lock className="w-3 h-3" /> Planner's Note
+                                                                    </div>
+                                                                )}
+                                                                <h3 className={`font-bold text-sm mb-3 flex items-center gap-2 ${item.isMemo ? 'text-amber-900' : 'text-slate-800'}`}>
+                                                                    {!item.isMemo && <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>}
+                                                                    {item.label}
+                                                                </h3>
+                                                                <p className={`text-sm leading-7 ${item.isMemo ? 'text-amber-800' : 'text-slate-600 pl-4 border-l border-slate-100'}`}>
+                                                                    {item.text}
+                                                                </p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </section>
+                                            ))}
+
+                                            <section>
+                                                <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-6 flex items-center gap-2">
+                                                    <span className="text-blue-600">7.</span> ロジック実装イメージ
+                                                </h2>
+                                                <div className="bg-slate-900 text-slate-300 p-6 rounded-lg font-mono text-xs overflow-x-auto shadow-inner border border-slate-800">
+                                                    <pre>{SPEC_SAMPLE.codeSnippet}</pre>
+                                                </div>
+                                                <p className="text-xs text-slate-500 mt-2 text-right">※擬似コードによるロジック概要図</p>
+                                            </section>
                                         </div>
                                     </div>
                                 </div>
-                                <button onclick="closeModal()" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                                    <Icons.X className="w-6 h-6 text-slate-500" />
-                                </button>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto p-8 md:p-12 bg-slate-50/50 scroll-smooth print:overflow-visible print:bg-white print:p-0">
-                                <div className="max-w-4xl mx-auto bg-white shadow-sm border border-slate-200 p-8 md:p-16 min-h-full print:border-0 print:shadow-none print:p-0">
-                                    <div className="border-b-2 border-slate-800 pb-6 mb-10">
-                                        <div className="inline-block px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded mb-4">CONFIDENTIAL</div>
-                                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">{SPEC_SAMPLE.title}</h1>
-                                    </div>
-
-                                    <div className="space-y-12">
-                                        {SPEC_SAMPLE.sections.map((section, idx) => (
-                                            <section key={idx} className="break-inside-avoid">
-                                                <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-6 flex items-center gap-2">
-                                                    <span className="text-blue-600">{idx + 1}.</span> {section.heading.split('. ')[1]}
-                                                </h2>
-
-                                                {section.hasMap && (
-                                                    <div className="mb-8 border border-slate-200 rounded-lg overflow-hidden shadow-sm break-inside-avoid">
-                                                        <SpecMap />
-                                                        {section.imageCaption && (
-                                                            <div className="bg-slate-50 p-3 text-xs text-center text-slate-500 font-medium border-t border-slate-200">
-                                                                {section.imageCaption}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                <div className="space-y-8 pl-2 md:pl-4">
-                                                    {section.content.map((item, itemIdx) => (
-                                                        <div key={itemIdx} className={`relative ${item.isMemo ? 'bg-amber-50 p-6 rounded-lg border border-amber-200 break-inside-avoid' : ''}`}>
-                                                            {item.isMemo && (
-                                                                <div className="absolute -top-3 left-4 bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded border border-amber-200 flex items-center gap-1">
-                                                                    <span className="text-amber-900"><Icons.Lock width="12" height="12" /></span> Planner's Note
-                                                                </div>
-                                                            )}
-                                                            <h3 className={`font-bold text-sm mb-3 flex items-center gap-2 ${item.isMemo ? 'text-amber-900' : 'text-slate-800'}`}>
-                                                                {!item.isMemo && <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>}{item.label}
-                                                            </h3>
-                                                            <p className={`text-sm leading-7 ${item.isMemo ? 'text-amber-800' : 'text-slate-600 pl-4 border-l border-slate-100'}`}>
-                                                                {item.text}
-                                                            </p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </section>
-                                        ))}
-
-                                        <section className="break-inside-avoid">
-                                            <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 mb-6 flex items-center gap-2">
-                                                <span className="text-blue-600">7.</span> ロジック実装イメージ
-                                            </h2>
-                                            <div className="bg-slate-900 text-slate-300 p-6 rounded-lg font-mono text-xs overflow-x-auto shadow-inner border border-slate-800">
-                                                <pre>{SPEC_SAMPLE.codeSnippet}</pre>
-                                            </div>
-                                            <p className="text-xs text-slate-500 mt-2 text-right">※擬似コードによるロジック概要図</p>
-                                        </section>
-                                    </div>
+                                <div className="p-4 border-t border-slate-200 bg-white flex justify-end">
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shadow-lg"
+                                    >
+                                        閉じる
+                                    </button>
                                 </div>
                             </div>
-                            <div className="p-4 border-t border-slate-200 bg-white flex justify-end print:hidden">
-                                <button onclick="closeModal()" class="px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shadow-lg">
-                                    閉じる
-                                </button>
-                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             );
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<Portfolio />);
-    </script>
-    
-    <!-- モーダル制御用スクリプト (Global) -->
-    <script>
-        function openModal() {
-            const modal = document.getElementById('spec-modal');
-            modal.classList.remove('hidden');
-            document.body.classList.add('modal-open');
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('spec-modal');
-            modal.classList.add('hidden');
-            document.body.classList.remove('modal-open');
-        }
     </script>
 </body>
 </html>
